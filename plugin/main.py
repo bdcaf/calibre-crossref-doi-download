@@ -14,8 +14,9 @@ if False:
 
 from PyQt5.Qt import QDialog, QVBoxLayout, QPushButton, QMessageBox, QLabel
 
-from calibre_plugins.interface_demo.config import prefs
+from calibre_plugins.acad_plug.config import prefs
 
+# from calibre import ipython
 
 class DemoDialog(QDialog):
 
@@ -44,6 +45,11 @@ class DemoDialog(QDialog):
         self.about_button.clicked.connect(self.about)
         self.l.addWidget(self.about_button)
 
+        # ipython does not work like this
+        # self.debug_button = QPushButton('Debug Plugin', self)
+        # self.debug_button.clicked.connect(self.debug)
+        # self.l.addWidget(self.debug_button)
+
         self.marked_button = QPushButton(
             'Show books with only one format in the calibre GUI', self)
         self.marked_button.clicked.connect(self.marked)
@@ -65,6 +71,9 @@ class DemoDialog(QDialog):
         self.l.addWidget(self.conf_button)
 
         self.resize(self.sizeHint())
+
+    def debug(self):
+        ipython(locals())
 
     def about(self):
         # Get the about text from a file inside the plugin zip file

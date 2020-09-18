@@ -1,3 +1,9 @@
 [submodule "libs/python-bibtexparser"]
 	path = libs/python-bibtexparser
 	url = https://github.com/sciunto-org/python-bibtexparser.git
+[submodule "libs/pyparsing"]
+	path = libs/pyparsing
+	url = https://github.com/pyparsing/pyparsing.git
+[submodule "libs/pybtex"]
+	path = libs/pybtex
+	url = https://bitbucket.org/pybtex-devs/pybtex.git

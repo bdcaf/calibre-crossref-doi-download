@@ -19,17 +19,17 @@ class InterfacePluginDemo(InterfaceActionBase):
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
     '''
-    name                = 'Interface Plugin Demo'
-    description         = 'An advanced plugin demo'
+    name                = 'Academic Plugin'
+    description         = 'Some academic funtions for calibre'
     supported_platforms = ['windows', 'osx', 'linux']
-    author              = 'Kovid Goyal'
+    author              = 'Clemens Ager'
     version             = (1, 0, 0)
     minimum_calibre_version = (0, 7, 53)
 
     #: This field defines the GUI plugin class that contains all the code
     #: that actually does something. Its format is module_path:class_name
     #: The specified class must be defined in the specified module.
-    actual_plugin       = 'calibre_plugins.interface_demo.ui:InterfacePlugin'
+    actual_plugin       = 'calibre_plugins.acad_plug.ui:InterfacePlugin'
 
     def is_customizable(self):
         '''
@@ -60,7 +60,7 @@ class InterfacePluginDemo(InterfaceActionBase):
         # top of the module as importing the config class will also cause the
         # GUI libraries to be loaded, which we do not want when using calibre
         # from the command line
-        from calibre_plugins.interface_demo.config import ConfigWidget
+        from calibre_plugins.acad_plug.config import ConfigWidget
         return ConfigWidget()
 
     def save_settings(self, config_widget):
