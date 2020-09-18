@@ -1,0 +1,3 @@
+[submodule "libs/python-bibtexparser"]
+	path = libs/python-bibtexparser
+	url = https://github.com/sciunto-org/python-bibtexparser.git
