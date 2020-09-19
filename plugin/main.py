@@ -15,8 +15,9 @@ if False:
 from PyQt5.Qt import QDialog, QVBoxLayout, QPushButton, QMessageBox, QLabel
 
 from calibre_plugins.acad_plug.config import prefs
+from calibre import browser
+from calibre_plugins.acad_plug.doi_reader import DoiReader
 
-# from calibre import ipython
 
 class DemoDialog(QDialog):
 
@@ -40,6 +41,10 @@ class DemoDialog(QDialog):
 
         self.setWindowTitle('Interface Plugin Demo')
         self.setWindowIcon(icon)
+
+        self.infowin_button = QPushButton('Info Window', self)
+        self.infowin_button.clicked.connect(self.show_new_window)
+        self.l.addWidget(self.infowin_button)
 
         self.about_button = QPushButton('About', self)
         self.about_button.clicked.connect(self.about)
@@ -161,3 +166,16 @@ class DemoDialog(QDialog):
         self.do_user_config(parent=self)
         # Apply the changes
         self.label.setText(prefs['hello_world_msg'])
+
+    def show_new_window(self, checked):
+            from calibre_plugins.acad_plug.info import AnotherWindow
+            dr = DoiReader()
+            res = dr.retrieve()
+
+            w = AnotherWindow(self.gui, data)
+            w.show()
+
+    def open_novisit(self, *args, **kwargs):
+        br = browser()
+        return br.open_novisit(*args, **kwargs)          
+
