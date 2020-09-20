@@ -6,10 +6,13 @@ __license__   = 'GPL v3'
 __copyright__ = '2020, Clemens Ager'
 __docformat__ = 'restructuredtext en'
 
+import json
 from calibre.ebooks.metadata.sources.base import Source
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre_plugins.doi_meta.doi_reader import DoiReader
-import json
+from calibre_plugins.doi_meta.doi_request import DoiQuery
+from calibre_plugins.doi_meta.config import prefs
+
 
 class DoiMeta(Source):
     '''
@@ -71,11 +74,6 @@ class DoiMeta(Source):
             of a book), this method should retry with just the title and author
             (assuming they were specified).
 
-            If this metadata source also provides covers, the URL to the cover
-            should be cached so that a subsequent call to the get covers API with
-            the same ISBN/special identifier does not need to get the cover URL
-            again. Use the caching API for this.
-
             Every Metadata object put into result_queue by this method must have a
             `source_relevance` attribute that is an integer indicating the order in
             which the results were returned by the metadata source for this query.
@@ -101,26 +99,47 @@ class DoiMeta(Source):
 
             '''
             log("start doi lookup")
-            if not identifiers.has_key('doi'):
-                log("has no doi entry")
-                return None
-            doi = identifiers['doi']
-            log.info("query doi entry '%s'"%doi)
-            url = 'https://api.crossref.org/works/%s'%doi
-            log.info("query url '%s'" % url)
-            # output = urlopen(url).read()
-            try:
-                br = self.browser
-                cdata = br.open_novisit(url).read()
-            except Exception as e:
-                log.exception('Online query failed.')
-                return as_unicode(e)
-
-
+            onlineQuery = DoiQuery(self.browser, log)
             reader = DoiReader(log)
-            mi = reader.parseDoi(cdata, identifiers)
+            if identifiers.has_key('doi'):
+                log("lookup by doi")
+                doi = identifiers['doi']
+                try:
+                    cdata = onlineQuery.queryByDoi(doi)
+                except Exception as e:
+                    self.logger.exception('Online query failed.')
+                    return as_unicode(e)
+                mi = reader.parseDoi(cdata, identifiers)
+                mi.source_relevance = 100
+                result_queue.put(mi)
 
-            result_queue.put(mi)
+            if prefs['query_extra_by_name'] or not identifiers.has_key('doi'):
+                # see https://github.com/CrossRef/rest-api-doc#queries
+                log("lookup by query")
+                query = {}
+                nres = prefs['query_max_res']
+                query['rows']=nres
+
+                bibquery = []
+                if title:
+                    bibquery += list(self.get_title_tokens(title))
+                if authors:
+                    bibquery += list(self.get_author_tokens(authors))
+                query['query.bibliographic']= " ".join(bibquery)
+                # log.info("query: %s" % query)
+                try:
+                    cdata = onlineQuery.byQuery(query)
+                    d2 =  json.loads(cdata)
+                    message = d2['message']
+                    results = message['items']
+                    fin = map(lambda x:reader.result2meta(x,identifiers),results)
+                    map(lambda x: result_queue.put(x), fin)
+
+                except Exception as e:
+                    log.exception('Online query failed.')
+                    return e
+
+
             return None
 
     def is_customizable(self):
