@@ -6,9 +6,11 @@ setup: setup_submodules link_libs
 setup_submodules: 
 	git submodule update --init --recursive --remote --merge
 
-link_libs: plugin/bibtexparser plugin/pyparsing
+link_libs: 
 
 # note link needs to be relative to link location! - more modern ln has -r option, but not mac.
+#plugin/pybtex: libs/pybtex-0.22.2/pybtex/
+	#ln -shF ../$< $@
 #plugin/pyparsing: libs/pyparsing/pyparsing/
 	#ln -shF ../$< $@
 #plugin/bibtexparser: libs/python-bibtexparser/bibtexparser 
@@ -21,14 +23,20 @@ publish/example.zip:
 	#zip -r $@ plugin/ -x \*/tests/\*
 
 # development
-refresh_plugin: 
+refresh_plugin: link_libs
 	calibre-debug -s; calibre-customize -b plugin/
 runplug: refresh_plugin
-	calibre
+	calibre-debug -g
 
 ipython: refresh_plugin
-	calibre-debug -c "from calibre import ipython; ipython(locals())"
+	calibre-debug plugin/debug.py
 
-clean: clean_pub
+clean: remove_plugin remove_linked clean_pub
 clean_pub:
 	rm -rf publish/*
+remove_linked:
+	find plugin -type l -delete
+
+remove_plugin:
+	# list plugins with calibre-customize -l
+	calibre-customize -r "DOI Metadata"

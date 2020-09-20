@@ -14,9 +14,9 @@ if False:
 
 from PyQt5.Qt import QDialog, QVBoxLayout, QPushButton, QMessageBox, QLabel
 
-from calibre_plugins.acad_plug.config import prefs
+from calibre_plugins.doi_meta.config import prefs
 from calibre import browser
-from calibre_plugins.acad_plug.doi_reader import DoiReader
+from calibre_plugins.doi_meta.doi_reader import DoiReader
 
 
 class DemoDialog(QDialog):
@@ -168,7 +168,7 @@ class DemoDialog(QDialog):
         self.label.setText(prefs['hello_world_msg'])
 
     def show_new_window(self, checked):
-            from calibre_plugins.acad_plug.info import AnotherWindow
+            from calibre_plugins.doi_meta.info import AnotherWindow
             dr = DoiReader()
             res = dr.retrieve()
 

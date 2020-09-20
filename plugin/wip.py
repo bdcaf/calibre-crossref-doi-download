@@ -1,6 +1,6 @@
 # https://manual.calibre-ebook.com/develop.html
 # https://manual.calibre-ebook.com/creating_plugins.html
-from calibre_plugins.acad_plug.doi_reader import DoiReader
+from calibre_plugins.doi_meta.doi_reader import DoiReader
 dr = DoiReader()
 dr.retrieve()
 
