@@ -19,10 +19,13 @@ prefs = JSONConfig('plugins/doi_meta')
 
 # Set defaults
 # prefs.defaults['query_max_res'] = 10
+prefs.defaults['abstract_to_comment'] = True
 prefs.defaults['query_to_comment'] = True
 prefs.defaults['query_extra_by_name'] = False
 prefs.defaults['add_tags'] = False
 
+prefs.defaults['prefer_short_title'] = False
+prefs.defaults['prefer_short_journal'] = False
 
 class ConfigWidget(QWidget):
 
@@ -32,6 +35,19 @@ class ConfigWidget(QWidget):
         self.setLayout(self.l)
         self.form_elements = {}
 
+        self.put_element(
+            'prefer_short_title',
+            QCheckBox(_('Prefer short title if available'), self)
+        )
+        self.put_element(
+            'prefer_short_journal',
+            QCheckBox(_('Prefer short journal name if available'), self)
+        )
+
+        self.put_element(
+            'abstract_to_comment',
+            QCheckBox(_('Put abstract in comment'), self)
+        )
         self.put_element(
             'query_to_comment',
             QCheckBox(_('Write additional info in comments'), self)
@@ -68,7 +84,6 @@ class ConfigWidget(QWidget):
 
     def save_settings(self):
         for key,obj in self.form_elements.items():
-            print("key: '%s'", key)
             if isinstance(obj, QCheckBox):
                 print("Checkbox %s" % key)
                 print("Value %s" % obj.checkState)

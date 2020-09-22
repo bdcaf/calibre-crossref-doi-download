@@ -9,104 +9,118 @@ from calibre.utils.date import parse_date
 from calibre.utils.localization import canonicalize_lang
 from calibre_plugins.doi_meta.config import prefs
 
+def get_title(result):
+    if prefs['prefer_short_title'] and result.has_key('short-title'):
+        title = ' '.join(result['short-title'])
+    elif result.has_key('title'):
+        title = ' '.join(result['title'])
+    else:
+        title = _('Untitled')
+    return title
+
+def _author2string(author):
+    if author.has_key('family') and author.has_key('given'):
+        return (u"%s, %s" % (author['family'],author['given']))
+    elif author.has_key('name'):
+        return author['name']
+    else:
+        raise Exception("Unimplementd author type: %s" % author)
+def get_author_list(result):
+    if result.has_key('author'):
+        al = result['author']
+        authors = [_author2string(x) for x in al]
+    else:
+        authors = [_('Unknown')]
+    return authors
+
+def update_identifiers(prev_identifiers, result):
+    if result.has_key('DOI'):
+        prev_identifiers['doi'] = result['DOI']
+    if result.has_key('ISBN'):
+        prev_identifiers['isbn'] = result['ISBN'][0]
+    return prev_identifiers
+
+def put_language(mi, result):
+    if result.has_key('language'):
+        mi.language = canonicalize_lang( result['language'])
+def put_publisher(mi,result):
+        if result.has_key('publisher'):
+            mi.publisher = result['publisher']
+def put_pubdate(mi,result):
+        if result.has_key('issued'):
+            mi.pubdate = datestr(result['issued'])
+def put_tags(mi,result):
+        if prefs['add_tags'] and result.has_key('subject'):
+            mi.tags = result['subject']
+def put_journal(mi,result):
+        if prefs['prefer_short_journal'] and result.has_key('short-container-title'):
+            mi.series = "/".join(result['short-container-title'])
+        elif result.has_key('container-title'):
+            mi.series = "/".join(result['container-title'])
+def put_series_index(mi, result):
+        if result.has_key('volume'):
+            mi.series_index= result['volume']
+        elif result.has_key('issue'):
+            mi.series_index= result['issue']
 class DoiReader:
     '''
     Class to convert from the result structure to a Metadata object.
     '''
     def __init__(self, logger):
         self.log = logger
-        self.toComment = prefs['query_to_comment']
-        self.toCustom = prefs['result_to_custom']
-        self.toTags = prefs['add_tags']
 
-    def parseDoi(self, cdata, identifiers = {}):
-        data = json.loads(cdata)
-        # check data['status']
-        if data['status'] != 'ok':
-            self.log.info("query result '%s'"%data['status'])
-            return "Bad response status: %s"%data['status']
-        if data['message-type'] != 'work':
-            self.log.warning("query result wrong type: '%s'"%data['message-type'])
-            return "Bad response type: %s"%data['message-type']
-        result = data['message']
-        return self.result2meta(result, identifiers)
+    # def parseDoi(self, cdata, identifiers = {}):
+        # data = json.loads(cdata)
+        # # check data['status']
+        # if data['status'] != 'ok':
+            # self.log.info("query result '%s'"%data['status'])
+            # return "Bad response status: %s"%data['status']
+        # if data['message-type'] != 'work':
+            # self.log.warning("query result wrong type: '%s'"%data['message-type'])
+            # return "Bad response type: %s"%data['message-type']
+        # result = data['message']
+        # return self.result2meta(result, identifiers)
 
-    def authorString(self, author):
-        if author.has_key('family') and author.has_key('given'):
-            return (u"%s, %s" % (author['family'],author['given']))
-        elif author.has_key('name'):
-            return author['name']
-        else:
-            self.log.warning("Weird author: %s" % author)
-            return None
-    def checkUsage(self, result):
-        diff = list(set(result.keys()) - set(DoiReader.used_fields))
-        if len(diff)>0:
-            self.log("unused fields: %s" % diff)
+
+    # def checkUsage(self, result):
+        # diff = list(set(result.keys()) - set(DoiReader.used_fields))
+        # if len(diff)>0:
+            # self.log("unused fields: %s" % diff)
 
     def result2meta(self, result, prev_identifiers={}):
-        if result.has_key('title'):
-            title = ': '.join(result['title'])
-        else:
-            title = _('Untitled')
-        if result.has_key('author'):
-            al = result['author']
-            authors = [self.authorString(x) for x in al]
-        else:
-            authors = [_('Unknown')]
-
-        if result.has_key('DOI'):
-            prev_identifiers['doi'] = result['DOI']
+        title = get_title(result)
+        authors = get_author_list(result)
         mi = Metadata(title, authors)
-        mi.identifiers = prev_identifiers
-        if result.has_key('language'):
-            mi.language = canonicalize_lang( result['language'])
-        if result.has_key('publisher'):
-            mi.publisher = result['publisher']
-        if self.toTags and result.has_key('subject'):
-            mi.tags = result['subject']
 
-        if result.has_key('published-print'):
-            mi.pubdate = datestr(result['published-print'])
-        elif result.has_key('published-online'):
-            mi.pubdate = datestr(result['published-online'])
+        mi.identifiers = update_identifiers(prev_identifiers, result)
 
-        if result.has_key('container-title'):
-            mi.series = "/".join(result['container-title'])
-        if result.has_key('volume'):
-            mi.series_index= result['volume']
-        elif result.has_key('issue'):
-            mi.series_index= result['issue']
+        put_publisher(mi,result)
+        put_language(mi,result)
+        put_pubdate(mi,result)
+        put_tags(mi,result)
+        put_journal(mi, result)
+        put_series_index(mi, result)
 
-        if self.toComment:
+        comments = ""
+        if prefs['abstract_to_comment'] and result.has_key('abstract'):
+            comments = "\n\n".join([comments, result['abstract']])
+
+        if prefs['query_to_comment']:
             extra_meta = self.mkComments(result)
-            mi.comments = "\n".join(extra_meta)
-
-        mi.set_user_metadata('#ctext',
-                             {'datatype':'text',
-                              'name': 'my text',
-                              'is_multiple':{},
-                              '#value#':'123'
-                              })
-        # mi.set_user_metadata("#doires",{'datatype':'is_multiple', '#value#':["hi","tthere"]})
-        # mi.set_user_metadata("#doires",{'datatype':'*text',
-            # 'is_multiple':{'cache_to_list': ',',
-              # 'ui_to_list': ',',
-              # 'list_to_ui': ', '},'name':'DoiRes', '#value#':'haha'})
-
-        # if self.toCustom:
-            # extra_meta = self.mkComments(result)
-            # mi.set('#doires', extra_meta)
+            extra_plus = map(lambda x: "crossref:%s" % x, extra_meta)
+            extra = "\n".join(extra_plus)
+            comments = "\n\n".join([comments,extra])
+        mi.comments = comments
 
         if result.has_key('score'):
             mi.source_relevance= 100 - result['score']
         else:
-            mi.source_relevance=100 
+            mi.source_relevance=100
         # self.log.info("set comment to %s"%mi.comments)
         return mi
 
     def mkComments(self, result):
-        extra_meta=["DOI-Download-Data:"]
+        extra_meta=[]
         def quick_add(key, name=None, joiner=", "):
             if name is None:
                 name = key
@@ -114,16 +128,35 @@ class DoiReader:
                 v = result[key]
                 if isinstance(v, list):
                     strval = joiner.join(v)
+                elif isinstance(v, dict):
+                    if v.has_key('date-parts'):
+                        strval = read_partial_date(v)
+                    else:
+                        strval=v
                 else:
                     strval = v
                 extra_meta.append("%s: %s" % (key,strval))
 
-        quick_add('type')
-        quick_add('container-title', 'journal')
-        quick_add('volume')
-        quick_add('page')
-        quick_add('issue')
-        quick_add('ISSN')
+        to_add= { 'type':None
+                 ,'title':None
+                 ,'short-title':None
+                 ,'subtitle':None
+                 ,'publisher':None
+                 ,'issued':None
+                 ,'container-title':'journal'
+                 ,'short-container-title':'short-journal'
+                 ,'volume':None
+                 ,'issue':None
+                 ,'page':None
+                 ,'DOI':None
+                 ,'ISBN':None
+                 ,'ISSN':None
+                 ,'language':None
+                 ,'published-print':None
+                 ,'published-online':None
+                 }
+        for a,targ in to_add.items():
+            quick_add(a,targ)
 
         if result.has_key('link'):
             links = result['link']
@@ -132,34 +165,14 @@ class DoiReader:
             extra_meta.append("URL: %s" % (" ".join(url_only)))
         return extra_meta
 
-        if  result.has_key('journal-issue'):
-            ji = result['journal-issue']
-            if ji.has_key('published-print'):
-                jd ="-".join(map(str,ji['published-print']['date-parts'][0]))
-                extra_meta.append("published: %s" % (jd))
+        # if  result.has_key('journal-issue'):
+            # ji = result['journal-issue']
+            # if ji.has_key('published-print'):
+                # jd ="-".join(map(str,ji['published-print']['date-parts'][0]))
+                # extra_meta.append("published: %s" % (jd))
 
-    # def retrieve(self):
-    # url = 'https://api.crossref.org/works/10.1002/bmc.835'
-    # # output = urlopen(url).read()
-    # br = browser()
-    # cdata = br.open_novisit(url, timeout=DoiReader.timeout).read()
-    # # urlbad = 'https://apu.crossref.urg/works/10.1002/bmc.835'
-    # # cdatabad = br.open_novisit(urlbad, timeout=30).read()
-    # # throws URLERROR
-    # # urlb2 = 'https://api.crossref.org/works/10.1002/bmi.836'
-    # # cdatabad = br.open_novisit(urlb2, timeout=30).read()
-    # # throws httperror_seek_wrapper
-    # data = json.loads(cdata)
-    # # check data['status']
-    # if data['status'] != 'ok':
-    # raise DoiException(data['status'])
-    # return data['message']
-
+def read_partial_date(dp):
+    return "-".join(map(str,dp['date-parts'][0]))
 def datestr(dp):
-    return parse_date("-".join(map(str,dp['date-parts'][0])))
-
-class DoiException(Exception):
-    def __init__( self, status ):
-        self.host = status
-        Exception.__init__(self, 'Bad Doi result exception:  %s' % status)
+    return parse_date(read_partial_date(dp))
 

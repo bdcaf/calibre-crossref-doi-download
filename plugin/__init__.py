@@ -87,8 +87,9 @@ class DoiMeta(Source):
                 try:
                     message = onlineQuery.queryByDoi(doi)
                 except Exception as e:
-                    self.logger.exception('Online query failed with reason: %s' % e)
+                    log.exception('Online query failed with reason: %s' % e)
                     return as_unicode(e)
+                log.info("sucessfull retrieve")
                 mi = reader.result2meta(message, identifiers)
                 mi.source_relevance = 1
                 result_queue.put(mi)
