@@ -1,5 +1,6 @@
 # get doi from url:
 # e.g. curl https://api.crossref.org/works/10.1002/bmc.835 > test
+# fields: https://github.com/Crossref/rest-api-doc/blob/master/api_format.md
 # Link is under URL
 import json
 
@@ -9,14 +10,14 @@ from calibre.utils.localization import canonicalize_lang
 from calibre_plugins.doi_meta.config import prefs
 
 class DoiReader:
-    used_fields= set(['author'
-                     ,'title'
-                     ,'issue'
-                     ,'volume'
-                      ])
+    '''
+    Class to convert from the result structure to a Metadata object.
+    '''
     def __init__(self, logger):
         self.log = logger
         self.toComment = prefs['query_to_comment']
+        self.toCustom = prefs['result_to_custom']
+        self.toTags = prefs['add_tags']
 
     def parseDoi(self, cdata, identifiers = {}):
         data = json.loads(cdata)
@@ -62,7 +63,7 @@ class DoiReader:
             mi.language = canonicalize_lang( result['language'])
         if result.has_key('publisher'):
             mi.publisher = result['publisher']
-        if result.has_key('subject'):
+        if self.toTags and result.has_key('subject'):
             mi.tags = result['subject']
 
         if result.has_key('published-print'):
@@ -81,10 +82,26 @@ class DoiReader:
             extra_meta = self.mkComments(result)
             mi.comments = "\n".join(extra_meta)
 
+        mi.set_user_metadata('#ctext',
+                             {'datatype':'text',
+                              'name': 'my text',
+                              'is_multiple':{},
+                              '#value#':'123'
+                              })
+        # mi.set_user_metadata("#doires",{'datatype':'is_multiple', '#value#':["hi","tthere"]})
+        # mi.set_user_metadata("#doires",{'datatype':'*text',
+            # 'is_multiple':{'cache_to_list': ',',
+              # 'ui_to_list': ',',
+              # 'list_to_ui': ', '},'name':'DoiRes', '#value#':'haha'})
+
+        # if self.toCustom:
+            # extra_meta = self.mkComments(result)
+            # mi.set('#doires', extra_meta)
+
         if result.has_key('score'):
-            mi.source_relevance= result['score']
+            mi.source_relevance= 100 - result['score']
         else:
-            mi.source_relevance= 0
+            mi.source_relevance=100 
         # self.log.info("set comment to %s"%mi.comments)
         return mi
 
@@ -145,3 +162,4 @@ class DoiException(Exception):
     def __init__( self, status ):
         self.host = status
         Exception.__init__(self, 'Bad Doi result exception:  %s' % status)
+

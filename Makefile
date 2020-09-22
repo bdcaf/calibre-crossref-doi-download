@@ -29,7 +29,7 @@ runplug: refresh_plugin
 	calibre-debug -g
 
 ipython: refresh_plugin
-	calibre-debug plugin/debug.py
+	calibre-debug helper/debug.py
 
 clean: remove_plugin remove_linked clean_pub
 clean_pub:

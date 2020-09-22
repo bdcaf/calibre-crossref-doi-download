@@ -34,35 +34,15 @@ class DoiMeta(Source):
     capabilities = frozenset(['identify'])
     touched_fields = frozenset(['title'
                                 ,'authors'
-                                ,'comments'
                                 ,'identifier:doi'
                                 ,'languages'
                                 ,'series'
                                 ,'pubdate'
                                 ,'publisher'
+                                ,'comments'
                                 ,'tags'
                                 ])
     supports_gzip_transfer_encoding=True
-
-    def get_book_url(self, identifiers):
-        '''
-        Return a 3-tuple or None. The 3-tuple is of the form:
-        (identifier_type, identifier_value, URL).
-        The URL is the URL for the book identified by identifiers at this
-        source. identifier_type, identifier_value specify the identifier
-        corresponding to the URL.
-        This URL must be browseable to by a human using a browser. It is meant
-        to provide a clickable link for the user to easily visit the books page
-        at this source.
-        If no URL is found, return None. This method must be quick, and
-        consistent, so only implement it if it is possible to construct the URL
-        from a known scheme given identifiers.
-        '''
-        if not identifiers.has_key('doi'):
-            return None
-        doi = identifiers['doi']
-        return ('doi', doi, 'https://api.crossref.org/works/%s'%doi )
-            # url = 'https://api.crossref.org/works/10.1002/bmc.835'
 
     def identify(self, log, result_queue, abort, title=None, authors=None,
                 identifiers={}, timeout=30):
@@ -98,27 +78,27 @@ class DoiMeta(Source):
                      of the error suitable for showing to the user
 
             '''
-            log("start doi lookup")
+            log.info("start doi lookup")
             onlineQuery = DoiQuery(self.browser, log)
             reader = DoiReader(log)
             if identifiers.has_key('doi'):
                 log("lookup by doi")
                 doi = identifiers['doi']
                 try:
-                    cdata = onlineQuery.queryByDoi(doi)
+                    message = onlineQuery.queryByDoi(doi)
                 except Exception as e:
-                    self.logger.exception('Online query failed.')
+                    self.logger.exception('Online query failed with reason: %s' % e)
                     return as_unicode(e)
-                mi = reader.parseDoi(cdata, identifiers)
-                mi.source_relevance = 100
+                mi = reader.result2meta(message, identifiers)
+                mi.source_relevance = 1
                 result_queue.put(mi)
 
             if prefs['query_extra_by_name'] or not identifiers.has_key('doi'):
                 # see https://github.com/CrossRef/rest-api-doc#queries
                 log("lookup by query")
                 query = {}
-                nres = prefs['query_max_res']
-                query['rows']=nres
+                # nres = prefs['query_max_res']
+                # query['rows']=nres
 
                 bibquery = []
                 if title:
@@ -128,9 +108,7 @@ class DoiMeta(Source):
                 query['query.bibliographic']= " ".join(bibquery)
                 # log.info("query: %s" % query)
                 try:
-                    cdata = onlineQuery.byQuery(query)
-                    d2 =  json.loads(cdata)
-                    message = d2['message']
+                    message = onlineQuery.byQuery(query)
                     results = message['items']
                     fin = map(lambda x:reader.result2meta(x,identifiers),results)
                     map(lambda x: result_queue.put(x), fin)
