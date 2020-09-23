@@ -1,7 +1,7 @@
-The Interface Plugin Demo
+Import DOI from crossref
 ===========================
 
-Created by Kovid Goyal
+Created by Clemens Ager
 
 Requires calibre >= 0.7.53
 

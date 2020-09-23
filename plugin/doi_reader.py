@@ -7,7 +7,7 @@ import json
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.utils.date import parse_date
 from calibre.utils.localization import canonicalize_lang
-from calibre_plugins.doi_meta.config import prefs
+from calibre_plugins.crossref_doi_download.config import prefs
 
 COMMENT_FIELDS = { 'type':None
                   ,'title':None

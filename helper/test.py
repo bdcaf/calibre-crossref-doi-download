@@ -4,8 +4,8 @@ from threading import Event
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.ebooks.metadata.sources.base import create_log
 from calibre.utils.logging import Log
-from calibre_plugins.doi_meta import DoiMeta
-from calibre_plugins.doi_meta.doi_reader import DoiReader
+from calibre_plugins.crossref_doi_download import DoiMeta
+from calibre_plugins.crossref_doi_download.doi_reader import DoiReader
 
 def init_test(tdir_name):
     tdir = tempfile.gettempdir()

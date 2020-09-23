@@ -9,7 +9,7 @@ See https://github.com/Crossref/rest-api-doc/blob/master/api_format.md for avail
 '''
 
 from itertools import chain
-from calibre_plugins.doi_meta.doi_reader import COMMENT_FIELDS
+from calibre_plugins.crossref_doi_download.doi_reader import COMMENT_FIELDS
 
 USED_FIELDS = frozenset(
     ['author'

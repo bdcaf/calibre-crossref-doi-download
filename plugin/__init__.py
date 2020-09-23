@@ -9,9 +9,9 @@ __docformat__ = 'restructuredtext en'
 import json
 from calibre.ebooks.metadata.sources.base import Source
 from calibre.ebooks.metadata.book.base import Metadata
-from calibre_plugins.doi_meta.doi_reader import DoiReader
-from calibre_plugins.doi_meta.doi_request import DoiQuery
-from calibre_plugins.doi_meta.config import prefs
+from calibre_plugins.crossref_doi_download.doi_reader import DoiReader
+from calibre_plugins.crossref_doi_download.doi_request import DoiQuery
+from calibre_plugins.crossref_doi_download.config import prefs
 
 
 class DoiMeta(Source):
@@ -24,11 +24,11 @@ class DoiMeta(Source):
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
     '''
-    name                = 'DOI Metadata'
-    description         = 'Download DOI metadata.'
+    name                = 'Crossref DOI Metadata Downloader'
+    description         = 'Download DOI metadata from Crossref API.'
     supported_platforms = ['windows', 'osx', 'linux']
     author              = 'Clemens Ager'
-    version             = (0, 0, 0)
+    version             = (0, 0, 1)
     minimum_calibre_version = (0, 7, 53)
 
     capabilities = frozenset(['identify'])
@@ -90,6 +90,7 @@ class DoiMeta(Source):
                     log.exception('Online query failed with reason: %s' % e)
                     return as_unicode(e)
                 log.info("sucessfull retrieve")
+
                 mi = reader.result2meta(message, identifiers)
                 mi.source_relevance = 1
                 result_queue.put(mi)
@@ -150,7 +151,7 @@ class DoiMeta(Source):
         # top of the module as importing the config class will also cause the
         # GUI libraries to be loaded, which we do not want when using calibre
         # from the command line
-        from calibre_plugins.doi_meta.config import ConfigWidget
+        from calibre_plugins.crossref_doi_download.config import ConfigWidget
         return ConfigWidget()
 
     def save_settings(self, config_widget):
@@ -160,9 +161,4 @@ class DoiMeta(Source):
         :param config_widget: The widget returned by :meth:`config_widget`.
         '''
         config_widget.save_settings()
-
-        # Apply the changes
-        # ac = self.actual_plugin_
-        # if ac is not None:
-            # ac.apply_settings()
 

@@ -39,4 +39,4 @@ remove_linked:
 
 remove_plugin:
 	# list plugins with calibre-customize -l
-	calibre-customize -r "DOI Metadata"
+	calibre-customize -r "Crossref DOI Metadata Downloader"

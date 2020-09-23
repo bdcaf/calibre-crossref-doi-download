@@ -1,6 +1,6 @@
 import urllib
 import json
-from calibre_plugins.doi_meta.config import prefs
+from calibre_plugins.crossref_doi_download.config import prefs
 # see https://github.com/CrossRef/rest-api-doc#queries
 
 class DoiQuery:
@@ -8,6 +8,14 @@ class DoiQuery:
     def __init__(self, browser, log):
         self.browser = browser
         self.logger= log
+        email = prefs['email4polite']
+        log.info("email: %s" % email)
+        add_req = {}
+        if len(email) > 5:
+            add_req['mailto']=email
+        self.add_req = add_req
+
+
 
     def check(self, cdata, identifiers = {}):
         data = json.loads(cdata)
@@ -24,16 +32,25 @@ class DoiQuery:
 
     def queryByDoi(self, doi):
         url = '%s/%s' % (DoiQuery.API, doi)
-        self.logger.info("query url '%s'" % url)
-        cdata = self.browser.open(url).read()
+        cdata = self.submitWithQuery(url)
         return self.check(cdata)
 
     def byQuery(self, query):
-        qs = urllib.urlencode(query)
-        url = '%s?%s' % (DoiQuery.API, qs)
-        self.logger.info("query url '%s'" % url)
-        cdata = self.browser.open(url).read()
+        url = DoiQuery.API
+        cdata = self.submitWithQuery(url, query)
         return self.check(cdata)
+
+    def submitWithQuery(self, url, query={}):
+        query.update(self.add_req)
+        self.logger("query is %s:" % query)
+        if len(query) >0:
+            qs = urllib.urlencode(query)
+            fullurl = '%s?%s' % (url, qs)
+            self.logger("fullurl is %s:" % fullurl)
+        else:
+            fullurl = url
+        cdata = self.browser.open(fullurl).read()
+        return cdata
 
 
 

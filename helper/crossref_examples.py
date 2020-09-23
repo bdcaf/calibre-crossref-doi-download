@@ -6,13 +6,14 @@ from itertools import chain
 log = Log()
 mydb = db('~/Archive/CalTest/').new_api
 
-from calibre_plugins.doi_meta import DoiMeta
+from calibre_plugins.crossref_doi_download import DoiMeta
 from calibre.ebooks.metadata.book.base import Metadata
-from calibre_plugins.doi_meta.doi_reader import DoiReader
+from calibre_plugins.crossref_doi_download.doi_reader import DoiReader
 
 from crossref_fields import USED_FIELDS, IGNORED_FIELDS, COND_FIELDS, check_uninterpreted_fields, check_uninterpreted_list
-# from calibre_plugins.doi_meta.crossref_fields import USED_FIELDS, IGNORED_FIELDS, COND_FIELDS, check_uninterpreted_fields
+# from calibre_plugins.crossref_doi_download.crossref_fields import USED_FIELDS, IGNORED_FIELDS, COND_FIELDS, check_uninterpreted_fields
 dm = DoiMeta('./plugin/')
+url1='https://api.crossref.org/works/10.1002/bmc.835?mailto=vikoya5988%40oniaj.com'
 
 def get_prop_list(results, prop):
     for ind,res in enumerate(results):
@@ -54,5 +55,6 @@ if __name__ == "__main__":
 pass
 
 # results = get_examples()['items']
+# check_res(results)
 # check_uninterpreted_list(results)
 # get_prop_list(results, 'standards-body')

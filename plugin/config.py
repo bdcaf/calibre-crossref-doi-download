@@ -27,6 +27,8 @@ prefs.defaults['add_tags'] = False
 prefs.defaults['prefer_short_title'] = False
 prefs.defaults['prefer_short_journal'] = False
 
+prefs.defaults['email4polite'] = ""
+
 class ConfigWidget(QWidget):
 
     def __init__(self):
@@ -35,6 +37,14 @@ class ConfigWidget(QWidget):
         self.setLayout(self.l)
         self.form_elements = {}
 
+        self.l.addRow(QLabel(_("Currently anonymous Crossref requests are unbearable slow.")))
+        self.l.addRow(QLabel(_("They say requests including an email address will go to 'polite' servers that are more responsive.")))
+
+        self.put_element(
+            'email4polite',
+            QLineEdit(self)
+            ,_('Email address for "polite" servers:')
+        )
         self.put_element(
             'prefer_short_title',
             QCheckBox(_('Prefer short title if available'), self)
@@ -85,8 +95,6 @@ class ConfigWidget(QWidget):
     def save_settings(self):
         for key,obj in self.form_elements.items():
             if isinstance(obj, QCheckBox):
-                print("Checkbox %s" % key)
-                print("Value %s" % obj.checkState)
                 prefs[key] = obj.checkState() == Qt.Checked
             elif isinstance(obj, QLineEdit):
                 prefs[key] = obj.text()
