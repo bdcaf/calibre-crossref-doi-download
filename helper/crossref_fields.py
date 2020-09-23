@@ -14,12 +14,15 @@ from calibre_plugins.crossref_doi_download.doi_reader import COMMENT_FIELDS
 USED_FIELDS = frozenset(
     ['author'
      ,'title'
+     ,'short-title' # optional as alternative
      ,'publisher'
-     ,'DOI'
      ,'issued'
      ,'container-title'
+     ,'short-container-title' # optional as alternative
      ,'ISBN'
+     ,'DOI'
      ,'language'
+     ,'subject' # to tags
      ,'score' # used for metadata relevance
      ])
 
@@ -27,13 +30,10 @@ COND_FIELDS = frozenset(
     COMMENT_FIELDS.keys() + [
         'type' # placed in comment
         ,'abstract' # offer to put it in comment
-        ,'short-title' # optional as alternative
         ,'subtitle' # todo
-        ,'short-container-title' # optional as alternative
         ,'issue' # volume OR issue will be put into series index (volume prefered)
         ,'volume' # to comments
         ,'page' # to comments
-        ,'subject' # to tags
         ,'ISSN' # to comments
         ,'published-print' # to comment
         ,'published-online' # to comment
