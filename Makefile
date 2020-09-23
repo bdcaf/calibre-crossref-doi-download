@@ -17,7 +17,7 @@ link_libs:
 	#ln -shF ../$< $@
 
 # create zip
-publish/crossref-doi-download.zip:
+publish/crossref-doi-download.zip: plugin/
 	mkdir -p $(@D)
 	cd plugin/; zip -r ../$@ ./ -x \*/tests/\*
 	#zip -r $@ plugin/ -x \*/tests/\*
