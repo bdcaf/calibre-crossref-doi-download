@@ -19,10 +19,7 @@ I keep experiencing following issues:
  - The query results also hold some fields not documented in [api format documentation](https://github.com/Crossref/rest-api-doc/blob/master/api_format.md).
  -  I keep receiving `503 Service unavailable` responses.
  
-On 2020-09-23 the [api format documentation](https://github.com/Crossref/rest-api-doc/blob/master/api_format.md) disappeared from github.
-[API documentation](https://github.com/CrossRef/rest-api-doc) appears still valid.
-
-Relevant fields were:
+Relevant facts:
  - There is a [service status page](http://status.crossref.org/)
  - They have "polite servers" that require one to provide a contact email.
  - They ramble about needing this for reliable service.
