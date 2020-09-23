@@ -2,8 +2,8 @@
 # vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__license__   = 'GPL v3'
-__copyright__ = '2011, Kovid Goyal <kovid@kovidgoyal.net>'
+__license__   = 'MIT License'
+__copyright__ = '2020, Clemens Ager <clemens.ager@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
 from PyQt5.Qt import QWidget, QHBoxLayout, QLabel, QLineEdit, QIntValidator, QFormLayout, QCheckBox, Qt
