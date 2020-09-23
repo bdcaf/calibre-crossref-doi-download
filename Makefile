@@ -8,7 +8,7 @@ publish/crossref-doi-download.zip: plugin/
 	#zip -r $@ plugin/ -x \*/tests/\*
 
 # development
-refresh_plugin: link_libs
+refresh_plugin: 
 	calibre-debug -s; calibre-customize -b plugin/
 runplug: refresh_plugin
 	calibre-debug -g
