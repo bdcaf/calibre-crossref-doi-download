@@ -39,6 +39,7 @@ class ConfigWidget(QWidget):
 
         self.l.addRow(QLabel(_("Currently anonymous Crossref requests are unbearable slow.")))
         self.l.addRow(QLabel(_("They say requests including an email address will go to 'polite' servers that are more responsive.")))
+        # self.l.addRow(QLabel(_("I feel bibliographic research data very sensitive so I suggest using an anonyomous address.")))
 
         self.put_element(
             'email4polite',
