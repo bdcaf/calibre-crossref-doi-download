@@ -25,14 +25,14 @@ class DoiQuery:
     def queryByDoi(self, doi):
         url = '%s/%s' % (DoiQuery.API, doi)
         self.logger.info("query url '%s'" % url)
-        cdata = self.browser.open_novisit(url).read()
+        cdata = self.browser.open(url).read()
         return self.check(cdata)
 
     def byQuery(self, query):
         qs = urllib.urlencode(query)
         url = '%s?%s' % (DoiQuery.API, qs)
         self.logger.info("query url '%s'" % url)
-        cdata = self.browser.open_novisit(url).read()
+        cdata = self.browser.open(url).read()
         return self.check(cdata)
 
 

@@ -9,6 +9,40 @@ from calibre.utils.date import parse_date
 from calibre.utils.localization import canonicalize_lang
 from calibre_plugins.doi_meta.config import prefs
 
+COMMENT_FIELDS = { 'type':None
+                  ,'title':None
+                  ,'short-title':None
+                  ,'subtitle':None
+                  ,'publisher':None
+                  ,'publisher-location':None # undocumented, but seems simple string
+                  ,'article-number':None # undocumented
+                  ,'issued':None
+                  ,'container-title':'journal'
+                  ,'short-container-title':'short-journal'
+                  ,'edition-number':None # not documented, but seems simple
+                  ,'volume':None
+                  ,'issue':None
+                  ,'page':None
+                  ,'DOI':None
+                  ,'ISBN':None
+                  ,'ISSN':None
+                  ,'language':None
+                  # following are just dumped
+                  ,'published-print':None
+                  ,'published-online':None
+                  ,'funder':None
+                  ,'editor':None
+                  ,'event':None
+                  ,'journal-issue':None # undocumented
+                  ,'funder':None
+                  ,'chair':None 
+                  ,'alternative-id':None 
+                  ,'institution':None # undocumented
+                  ,'degree':None # undocumented
+                  ,'archive':None # undocumented
+                  ,'standards-body':None # undocumented
+                  }
+
 def get_title(result):
     if prefs['prefer_short_title'] and result.has_key('short-title'):
         title = ' '.join(result['short-title'])
@@ -137,25 +171,7 @@ class DoiReader:
                     strval = v
                 extra_meta.append("%s: %s" % (key,strval))
 
-        to_add= { 'type':None
-                 ,'title':None
-                 ,'short-title':None
-                 ,'subtitle':None
-                 ,'publisher':None
-                 ,'issued':None
-                 ,'container-title':'journal'
-                 ,'short-container-title':'short-journal'
-                 ,'volume':None
-                 ,'issue':None
-                 ,'page':None
-                 ,'DOI':None
-                 ,'ISBN':None
-                 ,'ISSN':None
-                 ,'language':None
-                 ,'published-print':None
-                 ,'published-online':None
-                 }
-        for a,targ in to_add.items():
+        for a,targ in COMMENT_FIELDS.items():
             quick_add(a,targ)
 
         if result.has_key('link'):
