@@ -191,12 +191,6 @@ class DoiReader:
             extra_meta.append("URL: %s" % (" ".join(url_only)))
         return extra_meta
 
-        # if  result.has_key('journal-issue'):
-            # ji = result['journal-issue']
-            # if ji.has_key('published-print'):
-                # jd ="-".join(map(str,ji['published-print']['date-parts'][0]))
-                # extra_meta.append("published: %s" % (jd))
-
     def read_partial_date(self,dp):
         if dp.has_key('date-parts'):
             return "-".join(map(str,dp['date-parts'][0]))
