@@ -3,12 +3,12 @@
 # fields: https://github.com/Crossref/rest-api-doc/blob/master/api_format.md
 # Link is under URL
 import json
+import re
 
 from calibre.ebooks.metadata.book.base import Metadata
 from calibre.utils.date import parse_date
 from calibre.utils.localization import canonicalize_lang
 from calibre_plugins.crossref_doi_download.config import prefs
-import json
 
 NAME_FIELDS=frozenset(['author','editor','funder'])
 COMMENT_FIELDS = { 'type':None
@@ -37,8 +37,8 @@ COMMENT_FIELDS = { 'type':None
                   ,'event':None
                   ,'journal-issue':None # undocumented
                   ,'funder':None
-                  ,'chair':None 
-                  ,'alternative-id':None 
+                  ,'chair':None
+                  ,'alternative-id':None
                   ,'institution':None # undocumented
                   ,'degree':None # undocumented
                   ,'archive':None # undocumented
@@ -92,11 +92,8 @@ def put_journal(mi,result):
             mi.series = "/".join(result['short-container-title'])
         elif result.has_key('container-title'):
             mi.series = "/".join(result['container-title'])
-def put_series_index(mi, result):
-        if result.has_key('volume'):
-            mi.series_index= result['volume']
-        elif result.has_key('issue'):
-            mi.series_index= result['issue']
+
+
 class DoiReader:
     '''
     Class to convert from the result structure to a Metadata object.
@@ -134,7 +131,7 @@ class DoiReader:
         self.put_pubdate(mi,result)
         put_tags(mi,result)
         put_journal(mi, result)
-        put_series_index(mi, result)
+        self.put_series_index(mi, result)
 
         comments = ""
         if prefs['abstract_to_comment'] and result.has_key('abstract'):
@@ -214,3 +211,13 @@ class DoiReader:
             if result.has_key('issued'):
                 mi.pubdate = self.datestr(result['issued'])
 
+    def put_series_index(self, mi, result):
+        if result.has_key('volume'):
+            si = result['volume']
+        elif result.has_key('issue'):
+            si = result['issue']
+        else:
+            return
+        nums = re.findall('\d+', si)
+        if len(nums) > 0:
+            mi.series_index = nums[0]
