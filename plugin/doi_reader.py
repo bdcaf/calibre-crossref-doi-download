@@ -8,7 +8,7 @@ from calibre.ebooks.metadata.book.base import Metadata
 from calibre.utils.date import parse_date
 from calibre.utils.localization import canonicalize_lang
 from calibre_plugins.crossref_doi_download.config import prefs
-import urllib
+import json
 
 NAME_FIELDS=frozenset(['author','editor','funder'])
 COMMENT_FIELDS = { 'type':None
@@ -171,7 +171,7 @@ class DoiReader:
                         strval = self.read_partial_date(v)
                     else:
                         self.log.warning("Unhandled dict:","%s: %s" % (key, v) )
-                        strval = urllib.urlencode(v)
+                        strval = json.dumps(v, separators=(',', ':'))
                 else:
                     strval = v
                 extra_meta.append("%s: %s" % (key,strval))
