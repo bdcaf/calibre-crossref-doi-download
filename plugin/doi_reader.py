@@ -55,6 +55,8 @@ def get_title(result):
 def _author2string(author):
     if author.has_key('family') and author.has_key('given'):
         return (u"%s, %s" % (author['family'],author['given']))
+    elif author.has_key('family') and not author.has_key('given'):
+        return author['family']
     elif author.has_key('name'):
         return author['name']
     else:
@@ -80,9 +82,6 @@ def put_language(mi, result):
 def put_publisher(mi,result):
         if result.has_key('publisher'):
             mi.publisher = result['publisher']
-def put_pubdate(mi,result):
-        if result.has_key('issued'):
-            mi.pubdate = datestr(result['issued'])
 def put_tags(mi,result):
         if prefs['add_tags'] and result.has_key('subject'):
             mi.tags = result['subject']
@@ -130,7 +129,7 @@ class DoiReader:
 
         put_publisher(mi,result)
         put_language(mi,result)
-        put_pubdate(mi,result)
+        self.put_pubdate(mi,result)
         put_tags(mi,result)
         put_journal(mi, result)
         put_series_index(mi, result)
@@ -164,7 +163,7 @@ class DoiReader:
                     strval = joiner.join(v)
                 elif isinstance(v, dict):
                     if v.has_key('date-parts'):
-                        strval = read_partial_date(v)
+                        strval = self.read_partial_date(v)
                     else:
                         strval=v
                 else:
@@ -187,8 +186,26 @@ class DoiReader:
                 # jd ="-".join(map(str,ji['published-print']['date-parts'][0]))
                 # extra_meta.append("published: %s" % (jd))
 
-def read_partial_date(dp):
-    return "-".join(map(str,dp['date-parts'][0]))
-def datestr(dp):
-    return parse_date(read_partial_date(dp))
+    def read_partial_date(self,dp):
+        if dp.has_key('date-parts'):
+            return "-".join(map(str,dp['date-parts'][0]))
+        else:
+            return None
+
+    def datestr(self,dp):
+        ds = self.read_partial_date(dp)
+        if ds:
+            try:
+                return parse_date(ds)
+            except Exception as e:
+                self.log.warning("failed date input", dp)
+                self.log.warning("failed date result", e)
+                return None
+        else:
+            self.log.warning("unknown date format:", dp)
+            return None
+
+    def put_pubdate(self,mi,result):
+            if result.has_key('issued'):
+                mi.pubdate = self.datestr(result['issued'])
 
