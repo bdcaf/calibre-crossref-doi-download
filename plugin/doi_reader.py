@@ -9,6 +9,7 @@ from calibre.utils.date import parse_date
 from calibre.utils.localization import canonicalize_lang
 from calibre_plugins.crossref_doi_download.config import prefs
 
+NAME_FIELDS=frozenset(['author','editor','funder'])
 COMMENT_FIELDS = { 'type':None
                   ,'title':None
                   ,'short-title':None
@@ -160,18 +161,26 @@ class DoiReader:
             if result.has_key(key):
                 v = result[key]
                 if isinstance(v, list):
-                    strval = joiner.join(v)
+                    if (key in NAME_FIELDS):
+                        strval = joiner.join(map(_author2string, v))
+                    else:
+                        strval = joiner.join(v)
                 elif isinstance(v, dict):
                     if v.has_key('date-parts'):
                         strval = self.read_partial_date(v)
                     else:
-                        strval=v
+                        self.log.warning("Unhandled dict:","%s: %s" % (key, v) )
                 else:
                     strval = v
                 extra_meta.append("%s: %s" % (key,strval))
 
         for a,targ in COMMENT_FIELDS.items():
-            quick_add(a,targ)
+            try:
+                quick_add(a,targ)
+            except Exception as e:
+                self.log.warning("Encountered problem:",e )
+                self.log.warning("Unhandled input:","%s: %s" % (a, result[a]) )
+
 
         if result.has_key('link'):
             links = result['link']
