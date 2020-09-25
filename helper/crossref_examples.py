@@ -17,7 +17,7 @@ url1='https://api.crossref.org/works/10.1002/bmc.835?mailto=vikoya5988%40oniaj.c
 
 def get_prop_list(results, prop):
     for ind,res in enumerate(results):
-        if res.has_key(prop):
+        if prop in res:
             print(ind,res[prop])
 
 
@@ -25,7 +25,7 @@ reader = DoiReader(log)
 
 br = dm.browser
 br.set_debug_http(True)
-# user_agent = 
+# user_agent =
         # [('User-agent',
         # 'Mozilla/5.0 (X11;U;Linux 2.4.2.-2 i586; en-us;m18) Gecko/200010131 Netscape6/6.01'
         # )]

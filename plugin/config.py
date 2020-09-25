@@ -75,7 +75,7 @@ class ConfigWidget(QWidget):
 
 
     def put_element(self, name, widget, title=None):
-        if not self.form_elements.has_key(name):
+        if not name in self.form_elements:
             self.form_elements[name] = widget
             if title:
                 self.l.addRow(title,widget)

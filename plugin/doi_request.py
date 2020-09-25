@@ -1,4 +1,4 @@
-import urllib
+from urllib.parse import urlencode
 import json
 from calibre_plugins.crossref_doi_download.config import prefs
 # see https://github.com/CrossRef/rest-api-doc#queries
@@ -9,7 +9,6 @@ class DoiQuery:
         self.browser = browser
         self.logger= log
         email = prefs['email4polite']
-        log.info("email: %s" % email)
         add_req = {}
         if len(email) > 5:
             add_req['mailto']=email
@@ -44,14 +43,10 @@ class DoiQuery:
         query.update(self.add_req)
         self.logger("query is %s:" % query)
         if len(query) >0:
-            qs = urllib.urlencode(query)
+            qs = urlencode(query)
             fullurl = '%s?%s' % (url, qs)
             self.logger("fullurl is %s:" % fullurl)
         else:
             fullurl = url
         cdata = self.browser.open(fullurl).read()
         return cdata
-
-
-
-

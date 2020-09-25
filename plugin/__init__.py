@@ -81,7 +81,7 @@ class DoiMeta(Source):
             log.info("start doi lookup")
             onlineQuery = DoiQuery(self.browser, log)
             reader = DoiReader(log)
-            if identifiers.has_key('doi'):
+            if 'doi' in identifiers:
                 log("lookup by doi")
                 doi = identifiers['doi']
                 try:
@@ -95,7 +95,7 @@ class DoiMeta(Source):
                 mi.source_relevance = 1
                 result_queue.put(mi)
 
-            if prefs['query_extra_by_name'] or not identifiers.has_key('doi'):
+            if prefs['query_extra_by_name'] or not 'doi' in identifiers:
                 # see https://github.com/CrossRef/rest-api-doc#queries
                 log("lookup by query")
                 query = {}
@@ -161,4 +161,3 @@ class DoiMeta(Source):
         :param config_widget: The widget returned by :meth:`config_widget`.
         '''
         config_widget.save_settings()
-

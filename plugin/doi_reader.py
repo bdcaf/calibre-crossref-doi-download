@@ -46,25 +46,25 @@ COMMENT_FIELDS = { 'type':None
                   }
 
 def get_title(result):
-    if prefs['prefer_short_title'] and result.has_key('short-title'):
+    if prefs['prefer_short_title'] and 'short-title' in result:
         title = ' '.join(result['short-title'])
-    elif result.has_key('title'):
+    elif 'title' in result:
         title = ' '.join(result['title'])
     else:
         title = _('Untitled')
     return title
 
 def _author2string(author):
-    if author.has_key('family') and author.has_key('given'):
+    if 'family' in author and 'given' in author:
         return (u"%s, %s" % (author['family'],author['given']))
-    elif author.has_key('family') and not author.has_key('given'):
+    elif 'family' in author and not 'given' in author:
         return author['family']
-    elif author.has_key('name'):
+    elif 'name' in author:
         return author['name']
     else:
         raise Exception("Unimplementd author type: %s" % author)
 def get_author_list(result):
-    if result.has_key('author'):
+    if 'author' in result:
         al = result['author']
         authors = [_author2string(x) for x in al]
     else:
@@ -72,25 +72,25 @@ def get_author_list(result):
     return authors
 
 def update_identifiers(prev_identifiers, result):
-    if result.has_key('DOI'):
+    if 'DOI' in result:
         prev_identifiers['doi'] = result['DOI']
-    if result.has_key('ISBN'):
+    if 'ISBN' in result:
         prev_identifiers['isbn'] = result['ISBN'][0]
     return prev_identifiers
 
 def put_language(mi, result):
-    if result.has_key('language'):
+    if 'language' in result:
         mi.language = canonicalize_lang( result['language'])
 def put_publisher(mi,result):
-        if result.has_key('publisher'):
+        if 'publisher' in result:
             mi.publisher = result['publisher']
 def put_tags(mi,result):
-        if prefs['add_tags'] and result.has_key('subject'):
+        if prefs['add_tags'] and 'subject' in result:
             mi.tags = result['subject']
 def put_journal(mi,result):
-        if prefs['prefer_short_journal'] and result.has_key('short-container-title'):
+        if prefs['prefer_short_journal'] and 'short-container-title' in result:
             mi.series = "/".join(result['short-container-title'])
-        elif result.has_key('container-title'):
+        elif 'container-title' in result:
             mi.series = "/".join(result['container-title'])
 
 
@@ -134,7 +134,7 @@ class DoiReader:
         self.put_series_index(mi, result)
 
         comments = ""
-        if prefs['abstract_to_comment'] and result.has_key('abstract'):
+        if prefs['abstract_to_comment'] and 'abstract' in result:
             comments = "\n\n".join([comments, result['abstract']])
 
         if prefs['query_to_comment']:
@@ -144,7 +144,7 @@ class DoiReader:
             comments = "\n\n".join([comments,extra])
         mi.comments = comments
 
-        if result.has_key('score'):
+        if 'score' in result:
             mi.source_relevance= 100 - result['score']
         else:
             mi.source_relevance=100
@@ -156,7 +156,7 @@ class DoiReader:
         def quick_add(key, name=None, joiner=", "):
             if name is None:
                 name = key
-            if result.has_key(key):
+            if key in result:
                 v = result[key]
                 if isinstance(v, list):
                     if (key in NAME_FIELDS):
@@ -164,7 +164,7 @@ class DoiReader:
                     else:
                         strval = joiner.join(v)
                 elif isinstance(v, dict):
-                    if v.has_key('date-parts'):
+                    if 'date-parts' in v:
                         strval = self.read_partial_date(v)
                     else:
                         self.log.warning("Unhandled dict:","%s: %s" % (key, v) )
@@ -181,7 +181,7 @@ class DoiReader:
                 self.log.warning("Unhandled input:","%s: %s" % (a, result[a]) )
 
 
-        if result.has_key('link'):
+        if 'link' in result:
             links = result['link']
             remove_mining = filter(lambda x: x['intended-application']!='text-mining', links)
             url_only = map(lambda x: x['URL'], remove_mining)
@@ -189,7 +189,7 @@ class DoiReader:
         return extra_meta
 
     def read_partial_date(self,dp):
-        if dp.has_key('date-parts'):
+        if 'date-parts' in dp:
             return "-".join(map(str,dp['date-parts'][0]))
         else:
             return None
@@ -208,13 +208,13 @@ class DoiReader:
             return None
 
     def put_pubdate(self,mi,result):
-            if result.has_key('issued'):
+            if 'issued' in result:
                 mi.pubdate = self.datestr(result['issued'])
 
     def put_series_index(self, mi, result):
-        if result.has_key('volume'):
+        if 'volume' in result:
             si = result['volume']
-        elif result.has_key('issue'):
+        elif 'issue' in result:
             si = result['issue']
         else:
             return
