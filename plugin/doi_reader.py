@@ -101,28 +101,14 @@ class DoiReader:
     def __init__(self, logger):
         self.log = logger
 
-    # def parseDoi(self, cdata, identifiers = {}):
-        # data = json.loads(cdata)
-        # # check data['status']
-        # if data['status'] != 'ok':
-            # self.log.info("query result '%s'"%data['status'])
-            # return "Bad response status: %s"%data['status']
-        # if data['message-type'] != 'work':
-            # self.log.warning("query result wrong type: '%s'"%data['message-type'])
-            # return "Bad response type: %s"%data['message-type']
-        # result = data['message']
-        # return self.result2meta(result, identifiers)
-
-
-    # def checkUsage(self, result):
-        # diff = list(set(result.keys()) - set(DoiReader.used_fields))
-        # if len(diff)>0:
-            # self.log("unused fields: %s" % diff)
-
     def result2meta(self, result, prev_identifiers={}):
+        '''
+        Converts the result dict into Calibre metadata.
+        Note: Source download plugins do  not have access to custom columns.
+        '''
         title = get_title(result)
         authors = get_author_list(result)
-        mi = Metadata(title, authors)
+        mi = Metadata(title=title, authors=authors)
 
         mi.identifiers = update_identifiers(prev_identifiers, result)
 

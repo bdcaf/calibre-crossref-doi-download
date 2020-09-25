@@ -111,13 +111,21 @@ class DoiMeta(Source):
                 # log.info("query: %s" % query)
                 try:
                     message = onlineQuery.byQuery(query)
-                    results = message['items']
-                    fin = map(lambda x:reader.result2meta(x,identifiers),results)
-                    map(lambda x: result_queue.put(x), fin)
-
                 except Exception as e:
-                    log.exception('Online query failed.')
+                    log.exception('Online query failed:', e)
                     return e
+                results = message['items']
+                for r in results:
+                    try:
+                        rq =reader.result2meta(r,identifiers)
+                        result_queue.put(rq)
+                    except Exception as e:
+                        log.exception('Result parse failed:', e)
+                        log.exception('Result was:', r)
+                        return e
+                # fin = map(lambda x:reader.result2meta(x,identifiers),results)
+                # map(lambda x: result_queue.put(x), fin)
+
 
 
             return None

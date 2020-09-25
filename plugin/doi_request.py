@@ -41,11 +41,11 @@ class DoiQuery:
 
     def submitWithQuery(self, url, query={}):
         query.update(self.add_req)
-        self.logger("query is %s:" % query)
+        self.logger("query is:", query)
         if len(query) >0:
             qs = urlencode(query)
             fullurl = '%s?%s' % (url, qs)
-            self.logger("fullurl is %s:" % fullurl)
+            self.logger("Fullurl is:", fullurl)
         else:
             fullurl = url
         cdata = self.browser.open(fullurl).read()
