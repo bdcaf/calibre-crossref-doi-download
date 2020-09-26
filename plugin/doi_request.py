@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from polyglot.urllib import urlencode
 import json
 from calibre_plugins.crossref_doi_download.config import prefs
 # see https://github.com/CrossRef/rest-api-doc#queries
