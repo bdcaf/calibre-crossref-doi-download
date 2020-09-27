@@ -12,6 +12,7 @@ from calibre.ebooks.metadata.book.base import Metadata
 from calibre_plugins.crossref_doi_download.doi_reader import DoiReader
 from calibre_plugins.crossref_doi_download.doi_request import DoiQuery
 from calibre_plugins.crossref_doi_download.config import prefs
+import calibre_plugins.crossref_doi_download.short_doi as sd
 
 
 class DoiMeta(Source):
@@ -82,8 +83,12 @@ class DoiMeta(Source):
             onlineQuery = DoiQuery(self.browser, log)
             reader = DoiReader(log)
             if 'doi' in identifiers:
-                log("lookup by doi")
                 doi = identifiers['doi']
+                log("lookup by doi '%s'" % doi)
+                if sd.is_short_doi(doi):
+                    log.info("Identified short doi", doi)
+                    identifiers['toi'] =  doi
+                    doi=sd.return_full_doi(self.browser,doi)
                 try:
                     message = onlineQuery.queryByDoi(doi)
                 except Exception as e:
